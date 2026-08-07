@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supabase SIM Sales Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="logo-area">
+        <span class="logo-icon">⚡</span>
+        <h2>SIM Dashboard</h2>
+      </div>
+      <nav class="nav-menu">
+        <a href="#" class="nav-item active">
+          <span class="nav-icon">📊</span> Overview
+        </a>
+        <a href="#" id="settingsBtn" class="nav-item">
+          <span class="nav-icon">⚙️</span> API Config
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <p>BootCamp Assignment Project 2026</p>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="top-header">
+        <div class="header-title">
+          <h1>SIM Sales & Leaderboard</h1>
+          <p>Live performance tracking powered by Supabase RPC</p>
+        </div>
+
+        <div class="header-actions">
+          <div class="date-selector-wrapper">
+            <label for="reportDate">Report Date:</label>
+            <input type="date" id="reportDate" value="2026-05-31" min="2026-01-01" max="2026-12-31" class="date-input">
+          </div>
+          <button id="refreshBtn" class="btn btn-secondary">
+            <span class="icon">🔄</span> Refresh
+          </button>
+          <button id="openConfigBtn" class="btn btn-primary">
+            <span class="icon">🔑</span> API Settings
+          </button>
+        </div>
+      </header>
+
+      <!-- KPI Metrics Grid -->
+      <section class="kpi-grid">
+        <!-- Today's Sales -->
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-title">Today's Sales</span>
+            <span class="kpi-icon icon-blue">📦</span>
+          </div>
+          <h2 id="todaysSales" class="kpi-value">-</h2>
+          <div class="kpi-footer">
+            <span id="todaysSalesTrend" class="trend-indicator neutral">vs prev same day: -</span>
+          </div>
+        </div>
+
+        <!-- Today's Revenue -->
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-title">Today's Revenue</span>
+            <span class="kpi-icon icon-green">💵</span>
+          </div>
+          <h2 id="todaysRevenue" class="kpi-value">-</h2>
+          <div class="kpi-footer">
+            <span id="todaysRevenueTrend" class="trend-indicator neutral">vs prev same day: -</span>
+          </div>
+        </div>
+
+        <!-- MTD Sales -->
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-title">MTD Sales</span>
+            <span class="kpi-icon icon-purple">📈</span>
+          </div>
+          <h2 id="mtdSales" class="kpi-value">-</h2>
+          <div class="kpi-footer">
+            <span id="mtdSalesTrend" class="trend-indicator neutral">vs prev month: -</span>
+          </div>
+        </div>
+
+        <!-- MTD Revenue -->
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-title">MTD Revenue</span>
+            <span class="kpi-icon icon-yellow">💰</span>
+          </div>
+          <h2 id="mtdRevenue" class="kpi-value">-</h2>
+          <div class="kpi-footer">
+            <span id="mtdRevenueTrend" class="trend-indicator neutral">vs prev month: -</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Leaderboard & Trends Layout -->
+      <div class="analytics-layout">
+        <!-- Employee Leaderboard Table -->
+        <section class="glass-panel main-panel">
+          <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h3>Employee Leaderboard (MTD)</h3>
+            <div class="view-toggle">
+              <button id="viewTableBtn" class="btn-toggle active">📋 Table</button>
+              <button id="viewChartBtn" class="btn-toggle">📊 Chart</button>
+            </div>
+          </div>
+          <div id="leaderboardTableContainer" class="table-container">
+            <table class="leaderboard-table">
+              <thead>
+                <tr>
+                  <th style="width: 80px;">Rank</th>
+                  <th>Name</th>
+                  <th style="text-align: right;">MTD Sales</th>
+                  <th style="text-align: right;">MTD Revenue</th>
+                  <th style="text-align: right;">Today's Sales</th>
+                  <th style="text-align: right;">Today's Revenue</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboardBody">
+                <tr>
+                  <td colspan="6" class="table-loading">No leaderboard data loaded</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="leaderboardChartContainer" class="chart-container"
+            style="display: none; position: relative; height: 350px; width: 100%; margin-top: 20px;">
+            <canvas id="leaderboardChartCanvas"></canvas>
+          </div>
+        </section>
+
+        <!-- Sidebar Trends Panel -->
+        <section class="glass-panel side-panel">
+          <div class="panel-header">
+            <h3>Monthly Sales Trend</h3>
+          </div>
+          <div class="chart-container" style="position: relative; height: 220px; width: 100%;">
+            <canvas id="monthlyTrendChartCanvas"></canvas>
+          </div>
+
+          <div class="panel-header"
+            style="margin-top: 32px; display: flex; justify-content: space-between; align-items: center;">
+            <h3>Daily Sales Trend</h3>
+            <div class="view-toggle">
+              <button id="viewDailyBtn" class="btn-toggle active">Day</button>
+              <button id="viewWeeklyBtn" class="btn-toggle">Week</button>
+            </div>
+          </div>
+          <div class="chart-container" style="position: relative; height: 220px; width: 100%;">
+            <canvas id="dailyTrendChartCanvas"></canvas>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- API Configurations Modal -->
+  <div class="modal-overlay" id="configModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Supabase API Settings</h3>
+        <button class="close-btn" id="closeConfigBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Enter your Supabase credentials to load dashboard data from the database RPC endpoint.</p>
+
+        <div class="form-group">
+          <label for="apiUrlInput">Supabase API URL</label>
+          <input type="text" id="apiUrlInput"
+            value="https://picpwddoywtufoxoiyzq.supabase.co/rest/v1/rpc/get_sale_dashboard"
+            placeholder="https://your-project.supabase.co/rest/v1/rpc/...">
+        </div>
+
+        <div class="form-group">
+          <label for="apiKeyInput">Anon API Key (Public Key)</label>
+          <input type="password" id="apiKeyInput" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+          <small class="help-text">Your public anonymous key allows safe direct queries from the browser.</small>
+        </div>
+
+        <div class="status-banner error" id="apiStatusMessage" style="display: none;">
+          Please provide a valid API Key.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="resetConfigBtn" style="margin-right: auto; display: none;">Reset to
+          Default</button>
+        <button class="btn btn-secondary" id="cancelConfigBtn">Cancel</button>
+        <button class="btn btn-primary" id="saveConfigBtn">Save & Fetch Data</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
