@@ -1,19 +1,21 @@
 // ============================================================
-//  Configuration (comes from config.js — edit the key there)
+//  Supabase configuration
+//  Paste the anon (public) key below so the dashboard works
+//  for everyone after deployment.
 // ============================================================
-const CONFIG = window.APP_CONFIG || {};
-const DEFAULT_API_KEY = (CONFIG.SUPABASE_ANON_KEY || "").trim();
-const DEFAULT_API_URL = CONFIG.SUPABASE_API_URL || "https://picpwddoywtufoxoiyzq.supabase.co/rest/v1/rpc/get_sale_dashboard";
-const DEFAULT_REPORT_DATE = CONFIG.DEFAULT_REPORT_DATE || "";
+const HARDCODED_API_KEY = "";
 
-// Returns the key that should be used right now:
-// a browser override if the user saved one, otherwise the built-in key.
+const DEFAULT_API_URL = "https://picpwddoywtufoxoiyzq.supabase.co/rest/v1/rpc/get_sale_dashboard";
+const DEFAULT_REPORT_DATE = "2026-05-31";
+
+// Uses the hardcoded key; falls back to a key saved earlier in this
+// browser so local testing keeps working until the key above is filled in.
 function getActiveKey() {
-  return (localStorage.getItem("supabase_anon_key") || DEFAULT_API_KEY || "").trim();
+  return (HARDCODED_API_KEY || localStorage.getItem("supabase_anon_key") || "").trim();
 }
 
 function getActiveUrl() {
-  return (localStorage.getItem("supabase_api_url") || DEFAULT_API_URL || "").trim();
+  return DEFAULT_API_URL;
 }
 
 // DOM Elements for KPIs
@@ -93,82 +95,19 @@ if (typeof Chart !== 'undefined') {
 // Date Picker
 const reportDateInput = document.getElementById("reportDate");
 
-// Modal Elements
-const configModal = document.getElementById("configModal");
-const openConfigBtn = document.getElementById("openConfigBtn");
-const settingsBtn = document.getElementById("settingsBtn");
-const closeConfigBtn = document.getElementById("closeConfigBtn");
-const cancelConfigBtn = document.getElementById("cancelConfigBtn");
-const saveConfigBtn = document.getElementById("saveConfigBtn");
-const resetConfigBtn = document.getElementById("resetConfigBtn");
-const apiKeyInput = document.getElementById("apiKeyInput");
-const apiUrlInput = document.getElementById("apiUrlInput");
-const apiStatusMessage = document.getElementById("apiStatusMessage");
 const refreshBtn = document.getElementById("refreshBtn");
-const configNotice = document.getElementById("configNotice");
 
 // Initialize application
 document.addEventListener("DOMContentLoaded", () => {
-  // Prefill the settings form from config.js / saved overrides
-  apiUrlInput.value = getActiveUrl();
-  apiKeyInput.value = getActiveKey();
-
   if (DEFAULT_REPORT_DATE) {
     reportDateInput.value = DEFAULT_REPORT_DATE;
   }
 
-  // Load straight away when a key is available — no popup on startup.
   loadDashboard();
 
   // Setup Event Listeners
-  openConfigBtn.addEventListener("click", openModal);
-  settingsBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    openModal();
-  });
-
-  closeConfigBtn.addEventListener("click", closeModal);
-  cancelConfigBtn.addEventListener("click", closeModal);
-
-  // Close the modal by clicking the dimmed backdrop or pressing Escape
-  configModal.addEventListener("click", (e) => {
-    if (e.target === configModal) closeModal();
-  });
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && configModal.classList.contains("active")) closeModal();
-  });
-
   reportDateInput.addEventListener("change", loadDashboard);
   refreshBtn.addEventListener("click", loadDashboard);
-
-  saveConfigBtn.addEventListener("click", () => {
-    const key = apiKeyInput.value.trim();
-    const urlVal = apiUrlInput.value.trim();
-    if (!key) {
-      showStatusError("API Key cannot be empty.");
-      return;
-    }
-
-    localStorage.setItem("supabase_anon_key", key);
-    localStorage.setItem("supabase_api_url", urlVal);
-    closeModal();
-    loadDashboard();
-  });
-
-  if (resetConfigBtn) {
-    resetConfigBtn.addEventListener("click", () => {
-      // Clear browser overrides and fall back to config.js
-      localStorage.removeItem("supabase_anon_key");
-      localStorage.removeItem("supabase_api_url");
-
-      apiKeyInput.value = DEFAULT_API_KEY;
-      apiUrlInput.value = DEFAULT_API_URL;
-
-      resetConfigBtn.style.display = "none";
-      closeModal();
-      loadDashboard();
-    });
-  }
 
   // Toggle Leaderboard View
   if (viewTableBtn && viewChartBtn) {
@@ -209,47 +148,16 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// Single entry point for loading data — never forces the modal open.
+// Single entry point for loading data
 function loadDashboard() {
   const key = getActiveKey();
 
   if (!key) {
-    showConfigNotice(true);
-    showEmptyState("Add your Supabase API key in config.js to load the leaderboard.");
+    showEmptyState("Supabase API key is not configured.");
     return;
   }
 
-  showConfigNotice(false);
   fetchDashboardData(key, reportDateInput.value);
-}
-
-function showConfigNotice(visible) {
-  if (!configNotice) return;
-  configNotice.classList.toggle("visible", visible);
-}
-
-// Modal helpers
-function openModal() {
-  configModal.classList.add("active");
-
-  // Refresh the fields with whatever is currently in effect
-  apiUrlInput.value = getActiveUrl();
-  apiKeyInput.value = getActiveKey();
-
-  // "Reset to Default" only matters when a browser override hides the config.js key
-  const savedKey = localStorage.getItem("supabase_anon_key");
-  resetConfigBtn.style.display = (savedKey && DEFAULT_API_KEY) ? "inline-block" : "none";
-}
-
-function closeModal() {
-  configModal.classList.remove("active");
-  apiStatusMessage.style.display = "none";
-}
-
-function showStatusError(message) {
-  apiStatusMessage.textContent = message;
-  apiStatusMessage.className = "status-banner error";
-  apiStatusMessage.style.display = "block";
 }
 
 // Formatters

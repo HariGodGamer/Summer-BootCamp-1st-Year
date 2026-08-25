@@ -1,0 +1,19 @@
+# Secrets / environment
+.env
+.env.*
+!.env.example
+
+# Editor / IDE
+.vscode/
+.idea/
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# OS junk
+Thumbs.db
+desktop.ini
+.DS_Store
