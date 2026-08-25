@@ -4,10 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Supabase SIM Sales Dashboard</title>
+  <title>SIM Sales Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -17,7 +18,7 @@
     <!-- Sidebar Navigation -->
     <aside class="sidebar">
       <div class="logo-area">
-        <span class="logo-icon">⚡</span>
+        <span class="logo-icon">📶</span>
         <h2>SIM Dashboard</h2>
       </div>
       <nav class="nav-menu">
@@ -37,7 +38,7 @@
     <main class="main-content">
       <header class="top-header">
         <div class="header-title">
-          <h1>SIM Sales & Leaderboard</h1>
+          <h1>SIM Sales &amp; Leaderboard</h1>
           <p>Live performance tracking powered by Supabase RPC</p>
         </div>
 
@@ -54,6 +55,15 @@
           </button>
         </div>
       </header>
+
+      <!-- Shown only when no API key is configured anywhere -->
+      <div class="config-notice" id="configNotice">
+        <span class="notice-emoji">🔑</span>
+        <span class="notice-text">
+          No API key found yet. Paste your Supabase anon key into <code>config.js</code>
+          (or use the <strong>API Settings</strong> button) to load live data.
+        </span>
+      </div>
 
       <!-- KPI Metrics Grid -->
       <section class="kpi-grid">
@@ -167,7 +177,7 @@
     </main>
   </div>
 
-  <!-- API Configurations Modal -->
+  <!-- API Configurations Modal (opens only when the user clicks API Settings) -->
   <div class="modal-overlay" id="configModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -175,13 +185,11 @@
         <button class="close-btn" id="closeConfigBtn">&times;</button>
       </div>
       <div class="modal-body">
-        <p>Enter your Supabase credentials to load dashboard data from the database RPC endpoint.</p>
+        <p>These values come from <strong>config.js</strong>. You can override them here just for this browser.</p>
 
         <div class="form-group">
           <label for="apiUrlInput">Supabase API URL</label>
-          <input type="text" id="apiUrlInput"
-            value="https://picpwddoywtufoxoiyzq.supabase.co/rest/v1/rpc/get_sale_dashboard"
-            placeholder="https://your-project.supabase.co/rest/v1/rpc/...">
+          <input type="text" id="apiUrlInput" placeholder="https://your-project.supabase.co/rest/v1/rpc/...">
         </div>
 
         <div class="form-group">
@@ -198,11 +206,12 @@
         <button class="btn btn-secondary" id="resetConfigBtn" style="margin-right: auto; display: none;">Reset to
           Default</button>
         <button class="btn btn-secondary" id="cancelConfigBtn">Cancel</button>
-        <button class="btn btn-primary" id="saveConfigBtn">Save & Fetch Data</button>
+        <button class="btn btn-primary" id="saveConfigBtn">Save &amp; Fetch Data</button>
       </div>
     </div>
   </div>
 
+  <script src="config.js"></script>
   <script src="script.js"></script>
 </body>
 
